@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-export default function Results() {
+function ResultsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isValid = searchParams.get("isValid") === "true";
@@ -66,6 +67,7 @@ export default function Results() {
         >
           View Google Sheet
         </a>
+
         {!isValid && (
           <button
             className="block w-full mt-4 text-center bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
@@ -76,5 +78,13 @@ export default function Results() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function Results() {
+  return (
+    <Suspense fallback={<p className="text-center mt-6">Loading results...</p>}>
+      <ResultsContent />
+    </Suspense>
   );
 }
