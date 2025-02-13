@@ -16,6 +16,10 @@ const GOOGLE_SHEET_WEB_APP_URL = process.env.GOOGLE_APPS_SCRIPT_URL;
 // Initialize OpenAI (Server-side for security)
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+const normalizeDate = (dateStr: string): string => {
+  return dateStr.replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$3-$2-$1");
+};
+
 function checkValidName(providedName: string, extractedName: string): boolean {
   // Normalize case and remove extra spaces
   const normalize = (str: string) =>
@@ -121,7 +125,8 @@ export async function POST(req: Request) {
     }
 
     const extractedName = extractedData.name?.trim() || "";
-    const extractedDOB = extractedData.date_of_birth?.trim() || "";
+    const extractedDOB =
+      normalizeDate(extractedData.date_of_birth?.trim()) || "";
     const extractedPassportNumber = extractedData.passport_number?.trim() || "";
 
     // 🟢 Step 3: Validate Extracted Data
