@@ -47,7 +47,7 @@ function checkValidName(providedName: string, extractedName: string): boolean {
   );
 
   // Return true if 80% of the characters match
-  return matchPercentage >= 80;
+  return matchPercentage >= 95;
 }
 
 export async function POST(req: Request) {
