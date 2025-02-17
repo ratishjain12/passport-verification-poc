@@ -2,6 +2,9 @@
 import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
 import { OpenAI } from "openai";
+import { parseMRZ } from "@/utils/parseMRZ";
+import { verifyMRZ } from "@/utils/verifyMRZ";
+import { checkValidName } from "@/utils/verifyName";
 
 // Cloudinary Configuration
 cloudinary.config({
@@ -10,45 +13,8 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Google Apps Script URL
 const GOOGLE_SHEET_WEB_APP_URL = process.env.GOOGLE_APPS_SCRIPT_URL;
-
-// Initialize OpenAI (Server-side for security)
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-const normalizeDate = (dateStr: string): string => {
-  return dateStr.replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$3-$2-$1");
-};
-
-function checkValidName(providedName: string, extractedName: string): boolean {
-  // Normalize case and remove extra spaces
-  const normalize = (str: string) =>
-    str
-      .toLowerCase()
-      .replace(/\s+/g, "")
-      .replace(/[^a-z]/g, "");
-
-  const normalizedProvided = normalize(providedName);
-  const normalizedExtracted = normalize(extractedName);
-
-  // Ensure extracted name is not empty
-  if (!normalizedExtracted) return false;
-
-  // Build regex to check how many characters match
-  const matchCount = (
-    normalizedExtracted.match(new RegExp(`[${normalizedProvided}]`, "g")) || []
-  ).length;
-
-  // Calculate match percentage
-  const matchPercentage = (matchCount / normalizedProvided.length) * 100;
-
-  console.log(
-    `Match %: ${matchPercentage} | Provided: ${normalizedProvided}, Extracted: ${normalizedExtracted}`
-  );
-
-  // Return true if 80% of the characters match
-  return matchPercentage >= 95;
-}
 
 export async function POST(req: Request) {
   try {
@@ -66,18 +32,18 @@ export async function POST(req: Request) {
       );
     }
 
-    // Convert front image to base64 for OpenAI processing
     const frontBuffer = Buffer.from(await frontFile.arrayBuffer());
+    const backBuffer = Buffer.from(await backFile.arrayBuffer());
     const frontBase64 = frontBuffer.toString("base64");
 
-    // 🟢 Step 1: Use OpenAI Vision to Extract Passport Details
+    // 🟢 Step 2: Extract Passport Details and MRZ from Image using OpenAI
     const aiResponse = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
           role: "system",
           content:
-            'Extract passport details (Full Name, Date of Birth, Passport Number) from the image. Respond **only** in JSON format with no extra text. Example: { "name": "John Doe", "date_of_birth": "1990-01-01", "passport_number": "A1234567" }',
+            'Extract passport details (Full Name, Date of Birth, Passport Number, Expiry Date) and the MRZ (Machine Readable Zone) string from the image. Ensure the MRZ as well as all other fields are correctly extracted with no characters missed. The MRZ must be formatted as two lines separated by an escaped newline character (`\\n`) as shown in the example below. The date of birth must be in the format YYYY-MM-DD. Respond **only** in JSON format with no extra text. Example: ```json { "name": "John Doe", "date_of_birth": "1990-01-01", "passport_number": "A1234567", "mrz": "P<INDRAMADUGLA<<SITA<MAHA<LAKSHMI<<<<<<<<<<<<<<\\nJ8369854<4IND5909234F2110101<<<<<<<<<<<<<<<<<8"}```',
         },
         {
           role: "user",
@@ -96,49 +62,73 @@ export async function POST(req: Request) {
     });
 
     const aiResponseText = aiResponse.choices[0]?.message?.content || "";
-    console.log("AI Response Content:", aiResponseText); // Debugging log
+    // Log the raw AI response for debugging
+    console.log("Raw AI Response:", aiResponseText);
 
     let extractedData: any;
     try {
-      // Extract JSON safely (handles cases with triple backticks)
-      const jsonMatch = aiResponseText.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        extractedData = JSON.parse(jsonMatch[0]); // Parse only the extracted JSON
-      } else {
-        throw new Error("AI response did not contain valid JSON.");
+      // Strip Markdown formatting (e.g., ```json ... ```)
+      let cleanedResponse = aiResponseText.replace(/```json|```/g, "").trim();
+
+      // Remove any leading text like "json" or other prefixes
+      cleanedResponse = cleanedResponse.replace(/^json\s*/, "").trim();
+
+      // Validate and parse the cleaned JSON string
+      if (!cleanedResponse.startsWith("{")) {
+        throw new Error("Invalid JSON format: Expected JSON object.");
       }
+
+      extractedData = JSON.parse(cleanedResponse);
     } catch (error) {
-      console.error(
-        "JSON Parsing Error:",
-        error,
-        "Raw Response:",
-        aiResponseText
-      );
+      console.error("Error parsing AI response:", error);
+      console.error("Raw AI Response for Debugging:", aiResponseText);
       return NextResponse.json(
-        {
-          error:
-            "Failed to parse AI response. OpenAI response may be malformed.",
-          rawResponse: aiResponseText,
-        },
+        { error: "Failed to parse AI response. Please try again." },
         { status: 500 }
       );
     }
 
-    const extractedName = extractedData.name?.trim() || "";
-    const extractedDOB =
-      normalizeDate(extractedData.date_of_birth?.trim()) || "";
-    const extractedPassportNumber = extractedData.passport_number?.trim() || "";
+    const {
+      name: extractedName,
+      date_of_birth,
+      passport_number,
+      mrz,
+    } = extractedData;
 
-    // 🟢 Step 3: Validate Extracted Data
+    // 🟢 Step 3: Parse MRZ Fields
+    const {
+      passportNumber: mrzpassportNumber,
+      passportCheckDigit,
+      dob: mrzdob,
+      dobCheckDigit,
+      nationality,
+      expiry: mrzexpiry,
+      expiryCheckDigit,
+    } = parseMRZ(mrz);
+
+    // 🟢 Step 4: Validate Data
     const isValidName = checkValidName(name, extractedName);
+    const isValidDOB = date_of_birth === dob;
+    const isValidPassport = passport_number === passportNumber;
 
-    const isValidDOB = extractedDOB === dob;
-    const isValidPassport = extractedPassportNumber === passportNumber;
-    const isValid = isValidName && isValidDOB && isValidPassport;
+    // Validate MRZ
+    const isValidMRZ = verifyMRZ(
+      mrzpassportNumber,
+      mrzdob,
+      mrzexpiry,
+      passportCheckDigit,
+      dobCheckDigit,
+      expiryCheckDigit
+    );
 
-    console.log({ isValidName, isValidDOB, isValidPassport });
+    const isValid =
+      isValidName &&
+      isValidDOB &&
+      isValidPassport &&
+      isValidMRZ &&
+      nationality === "IND";
 
-    // 🟢 Step 4: Upload to Cloudinary
+    console.log({ isValidName, isValidDOB, isValidPassport, isValidMRZ });
     const frontUpload = await new Promise((resolve, reject) => {
       cloudinary.uploader
         .upload_stream({}, (error, result) => {
@@ -147,8 +137,6 @@ export async function POST(req: Request) {
         })
         .end(frontBuffer);
     });
-
-    const backBuffer = Buffer.from(await backFile.arrayBuffer());
     const backUpload = await new Promise((resolve, reject) => {
       cloudinary.uploader
         .upload_stream({}, (error, result) => {
@@ -158,7 +146,10 @@ export async function POST(req: Request) {
         .end(backBuffer);
     });
 
-    // 🟢 Step 5: Save to Google Sheets
+    const frontImageUrl = (frontUpload as any).secure_url;
+    const backImageUrl = (backUpload as any).secure_url;
+
+    // 🟢 Step 5: Save Data to Google Sheets
     const sheetResponse = await fetch(GOOGLE_SHEET_WEB_APP_URL!, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -167,8 +158,8 @@ export async function POST(req: Request) {
         inputDOB: dob,
         passportNumber: extractedData.passport_number?.trim() || "",
         isValid,
-        frontImage: (frontUpload as any).secure_url,
-        backImage: (backUpload as any).secure_url,
+        frontImage: frontImageUrl,
+        backImage: backImageUrl,
       }),
     });
 
@@ -179,8 +170,8 @@ export async function POST(req: Request) {
       success: true,
       isValid,
       extractedData,
-      frontImage: (frontUpload as any).secure_url,
-      backImage: (backUpload as any).secure_url,
+      frontImage: frontImageUrl,
+      backImage: backImageUrl,
     });
   } catch (error) {
     console.error("Processing Error:", error);
