@@ -75,12 +75,26 @@ export async function POST(req: Request) {
       backImageUrl,
     });
 
+    if (validationResult.isValid) {
+      // Redirect to contact details page with verified status
+      return NextResponse.json({
+        success: true,
+        isValid: true,
+        passportDetails: {
+          name: fullName,
+          dateOfBirth,
+          passportNumber,
+          isVerified: true,
+        },
+        nextStep: "/personal-details",
+      });
+    }
+
     return NextResponse.json({
-      success: true,
-      isValid: validationResult.isValid,
-      extractedData,
-      frontImage: frontImageUrl,
-      backImage: backImageUrl,
+      success: false,
+      isValid: false,
+      validationDetails: validationResult.details,
+      nextStep: "/verification-failed",
     });
   } catch (error) {
     console.error("Processing Error:", error);
