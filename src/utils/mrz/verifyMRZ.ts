@@ -44,3 +44,5 @@ export const verifyMRZ = (
 
   return passportValid && dobValid && expiryValid;
 };
+
+console.log("Test checksum:", calculateCheckDigit("N6095724<")); // Should output 0

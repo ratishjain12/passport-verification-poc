@@ -57,7 +57,8 @@ function ResultsContent() {
         >
           {isValid
             ? "✅ Passport Verified Successfully"
-            : "❌ Verification Failed"}
+            : `❌ Verification Failed!
+            Make sure you have uploaded a clear image of the passport`}
         </p>
 
         <a

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, type ChangeEvent } from "react";
@@ -42,8 +41,6 @@ export default function PassportVerificationPage() {
   const handleSubmit = async () => {
     const { fullName, dateOfBirth, passportNumber, frontImage, backImage } =
       formData;
-
-    console.log(fullName, dateOfBirth);
 
     if (
       !fullName ||
