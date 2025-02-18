@@ -22,7 +22,7 @@ export async function extractPassportDetails(
       {
         role: "system",
         content:
-          'Extract passport details (Full Name, Date of Birth, Passport Number, Expiry Date) and the MRZ (Machine Readable Zone) string from the image. Ensure the MRZ as well as all other fields are correctly extracted with no characters missed. The MRZ must be formatted as two lines separated by an escaped newline character (`\\n`) as shown in the example below. The date of birth must be in the format YYYY-MM-DD. Respond **only** in JSON format with no extra text, double check mrz is correctly extracted. Example: ```json { "name": "John Doe", "date_of_birth": "1990-01-01", "passport_number": "A1234567", "mrz": "P<INDRAMADUGLA<<SITA<MAHA<LAKSHMI<<<<<<<<<<<<<<\\nJ8369854<4IND5909234F2110101<<<<<<<<<<<<<<<<<8"}```',
+          'Extract passport details (Full Name, Date of Birth, Passport Number, Expiry Date) and the MRZ (Machine Readable Zone) string from the image. Ensure the MRZ as well as all other fields are correctly extracted with no characters missed. The MRZ must be formatted as two lines separated by an escaped newline character (`\\n`) as shown in the example below. The date of birth must be in the format YYYY-MM-DD. Respond **only** in JSON format with no extra text, double check mrz is correctly extracted. Example: ```json { "name": "John Doe", "date_of_birth": "1990-01-01", "passport_number": "A1234567", "mrz": "P<INDRAMADUGLA<<SITA<MAHA<LAKSHMI<<<<<<<<<<<<<<\\nJ8369854<4IND5909234F2110101<<<<<<<<<<<<<<<<<8"}```  Note: You must extract the MRZ very accurately!',
       },
       {
         role: "user",
@@ -53,12 +53,30 @@ export async function extractPassportDetails(
   return JSON.parse(cleanedResponse);
 }
 
-export async function uploadToCloudinary(buffer: Buffer): Promise<any> {
+interface CloudinaryUploadResult {
+  secure_url: string;
+  public_id: string;
+  version: number;
+  asset_id?: string;
+  width?: number;
+  height?: number;
+  format?: string;
+  resource_type?: string;
+  created_at?: string;
+  bytes?: number;
+  type?: string;
+  url?: string;
+}
+
+export async function uploadToCloudinary(
+  buffer: Buffer
+): Promise<CloudinaryUploadResult> {
   return new Promise((resolve, reject) => {
     cloudinary.uploader
       .upload_stream({}, (error, result) => {
         if (error) reject(error);
-        else resolve(result);
+        if (!result) reject(new Error("No result from Cloudinary"));
+        else resolve(result as CloudinaryUploadResult);
       })
       .end(buffer);
   });
@@ -80,10 +98,6 @@ export function validatePassportData(
   const { inputName, inputDOB, inputPassportNumber, extractedData, mrz } =
     params;
 
-  console.log("inputName", inputName);
-  console.log("inputDOB", inputDOB);
-  console.log("inputPassportNumber", inputPassportNumber);
-  console.log("extractedData", extractedData.name);
   console.log("mrz", mrz);
 
   const mrzData = parseMRZ(mrz);
