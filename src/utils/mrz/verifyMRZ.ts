@@ -1,13 +1,12 @@
 const charToNumber = (c: string): number => {
-  if (c >= "0" && c <= "9") return parseInt(c); // Digits
-  if (c >= "A" && c <= "Z") return c.charCodeAt(0) - 55; // Letters (A=10, B=11, ..., Z=35)
-  if (c === "<") return 0; // Filler character
-  return 0; // Invalid characters
+  if (c >= "0" && c <= "9") return parseInt(c);
+  if (c >= "A" && c <= "Z") return c.charCodeAt(0) - 55;
+  if (c === "<") return 0;
+  return 0;
 };
 
-// Calculate check digit for MRZ
 const calculateCheckDigit = (data: string): number => {
-  const weights = [7, 3, 1]; // Weights for check digit calculation
+  const weights = [7, 3, 1];
   const total = data
     .split("")
     .reduce(
@@ -17,7 +16,6 @@ const calculateCheckDigit = (data: string): number => {
   return total % 10;
 };
 
-// MRZ Validation function
 export const verifyMRZ = (
   passportNumber: string,
   dob: string,
@@ -26,20 +24,15 @@ export const verifyMRZ = (
   dobCheckDigit: string,
   expiryCheckDigit: string
 ): boolean => {
-  // Passport Number Check Digit Validation
   const passportCalculatedCheckDigit = calculateCheckDigit(passportNumber);
+  const dobCalculatedCheckDigit = calculateCheckDigit(dob);
+  const expiryCalculatedCheckDigit = calculateCheckDigit(expiry);
+
   const passportValid =
     passportCalculatedCheckDigit === parseInt(passportCheckDigit);
-
-  // Date of Birth Check Digit Validation
-  const dobCalculatedCheckDigit = calculateCheckDigit(dob);
   const dobValid = dobCalculatedCheckDigit === parseInt(dobCheckDigit);
-
-  // Expiry Date Check Digit Validation
-  const expiryCalculatedCheckDigit = calculateCheckDigit(expiry);
   const expiryValid = expiryCalculatedCheckDigit === parseInt(expiryCheckDigit);
 
-  // Log results for debugging
   console.log({
     passportCalculatedCheckDigit,
     passportValid,
@@ -49,6 +42,5 @@ export const verifyMRZ = (
     expiryValid,
   });
 
-  // Return true if all check digits are valid
   return passportValid && dobValid && expiryValid;
 };
