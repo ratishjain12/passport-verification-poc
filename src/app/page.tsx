@@ -2,6 +2,8 @@
 
 import { useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { setPassportDetails, setValidationDetails } from "@/store/userSlice";
 
 interface PassportFormData {
   fullName: string;
@@ -23,6 +25,7 @@ export default function PassportVerificationPage() {
   const [errorMessage, setErrorMessage] = useState("");
 
   const router = useRouter();
+  const dispatch = useDispatch();
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -70,19 +73,13 @@ export default function PassportVerificationPage() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
 
-      const queryParams = new URLSearchParams({
-        name: fullName,
-        dob: dateOfBirth,
-        passportNumber,
-        extractedName: data.extractedData.name,
-        extractedDOB: data.extractedData.date_of_birth,
-        extractedPassport: data.extractedData.passport_number,
-        isValid: String(data.isValid),
-        frontImage: data.frontImage,
-        backImage: data.backImage,
-      });
-
-      router.push(`/result?${queryParams.toString()}`);
+      if (data.success && data.isValid) {
+        dispatch(setPassportDetails(data.passportDetails));
+        router.push(data.nextStep);
+      } else {
+        dispatch(setValidationDetails(data.validationDetails));
+        router.push("/verification-failed");
+      }
     } catch (err) {
       console.error("Submission error:", err);
       setErrorMessage("Failed to process your request. Please try again.");
