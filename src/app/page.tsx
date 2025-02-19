@@ -1,4 +1,4 @@
-import PassportVerificationForm from "@/components/passport/PassportVerificationForm";
+import PassportVerificationForm from "@/components/forms/PassportVerificationForm";
 
 export default async function PassportVerificationPage() {
   return (

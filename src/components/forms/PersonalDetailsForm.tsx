@@ -45,7 +45,7 @@ export default function PersonalDetailsForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     dispatch(setContactDetails(formData));
-    router.push("/next-step");
+    router.push("/country-selection");
   };
 
   return (
