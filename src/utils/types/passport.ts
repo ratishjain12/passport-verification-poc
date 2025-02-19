@@ -39,7 +39,6 @@ export interface ValidationResult {
     isValidName: boolean;
     isValidDOB: boolean;
     isValidPassport: boolean;
-    isValidMRZ: boolean;
     isValidExpiry: boolean;
   };
 }
