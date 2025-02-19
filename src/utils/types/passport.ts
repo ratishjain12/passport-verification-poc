@@ -39,7 +39,6 @@ export interface ValidationResult {
     isValidName: boolean;
     isValidDOB: boolean;
     isValidPassport: boolean;
-    isValidMRZ: boolean;
     isValidExpiry: boolean;
   };
 }
@@ -48,6 +47,13 @@ export interface GoogleSheetsData {
   name: string;
   dob: string;
   passportNumber: string;
+  expiry: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  pincode?: string;
+  address1?: string;
+  address2?: string;
   isValid: boolean;
   frontImageUrl: string;
   backImageUrl: string;

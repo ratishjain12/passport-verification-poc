@@ -61,7 +61,6 @@ export default function PersonalDetailsForm() {
               type="text"
               name="name"
               value={formData.name}
-              onChange={handleChange}
               required
               className="w-full p-2 border rounded"
             />
@@ -72,7 +71,6 @@ export default function PersonalDetailsForm() {
               type="date"
               name="dateOfBirth"
               value={formData.dateOfBirth}
-              onChange={handleChange}
               required
               className="w-full p-2 border rounded"
             />
@@ -83,7 +81,6 @@ export default function PersonalDetailsForm() {
               type="text"
               name="passportNumber"
               value={formData.passportNumber}
-              onChange={handleChange}
               required
               className="w-full p-2 border rounded"
             />

@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
@@ -27,7 +26,7 @@ export default function PassportVerificationForm() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-
+  const [showModal, setShowModal] = useState(false); // State for modal visibility
   const router = useRouter();
   const dispatch = useDispatch();
 
@@ -62,6 +61,7 @@ export default function PassportVerificationForm() {
 
     setIsSubmitting(true);
     setErrorMessage("");
+    setShowModal(true); // Show modal when submission starts
 
     try {
       const formPayload = new FormData();
@@ -85,16 +85,53 @@ export default function PassportVerificationForm() {
         dispatch(setValidationDetails(data.validationDetails));
         router.push("/verification-failed");
       }
-    } catch (err) {
-      console.error("Submission error:", err);
-      setErrorMessage("Failed to process your request. Please try again.");
+    } catch {
+      setErrorMessage(
+        "Failed!! Please make sure you are uploading correct passport images."
+      );
     } finally {
       setIsSubmitting(false);
+      setShowModal(false); // Hide modal after submission completes
     }
   };
 
   return (
     <div className="space-y-6">
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center space-y-4">
+            <p className="text-lg font-medium">Processing Your Request</p>
+            <p className="text-sm text-gray-600">
+              This may take a few moments. Please do not close this page.
+            </p>
+            <div className="flex justify-center">
+              <svg
+                className="animate-spin h-6 w-6 text-blue-600"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Form Fields */}
       <div className="form-group">
         <label className="form-label">Full Name (as per passport)</label>
         <input
@@ -134,7 +171,9 @@ export default function PassportVerificationForm() {
       </div>
 
       <div className="form-group">
-        <label className="form-label">Front Side of Passport</label>
+        <label className="form-label">
+          Front Side of Passport (Upload Image)
+        </label>
         <input
           type="file"
           accept="image/*"
@@ -145,7 +184,9 @@ export default function PassportVerificationForm() {
       </div>
 
       <div className="form-group">
-        <label className="form-label">Back Side of Passport</label>
+        <label className="form-label">
+          Back Side of Passport (Upload Image)
+        </label>
         <input
           type="file"
           accept="image/*"
@@ -155,12 +196,14 @@ export default function PassportVerificationForm() {
         />
       </div>
 
+      {/* Error Message */}
       {errorMessage && (
         <p className="text-red-500 text-sm text-center bg-red-50 p-3 rounded-lg">
           {errorMessage}
         </p>
       )}
 
+      {/* Submit Button */}
       <button
         onClick={handleSubmit}
         disabled={isSubmitting}

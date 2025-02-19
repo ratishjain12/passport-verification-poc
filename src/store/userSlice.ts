@@ -12,6 +12,7 @@ interface UserState {
     isValidDOB: boolean;
     isValidPassport: boolean;
     isValidMRZ: boolean;
+    isValidExpiry: boolean;
   };
   contactDetails?: {
     address1: string;
@@ -26,7 +27,7 @@ interface UserState {
     imageUrl: string;
   };
   visaDetails?: {
-    imageUrl: string;
+    fileUrl: string;
   };
 }
 

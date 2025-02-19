@@ -1,7 +1,6 @@
 import { v2 as cloudinary } from "cloudinary";
 import { OpenAI } from "openai";
 import { parseMRZ } from "../mrz/parseMRZ";
-import { verifyMRZ } from "../mrz/verifyMRZ";
 import { checkValidName } from "../validation/verifyName";
 import type {
   ValidationParams,
@@ -22,7 +21,7 @@ export async function extractPassportDetails(
     messages: [
       {
         role: "system",
-        content: `You are an AI that extracts passport details from images. Always return the extracted   details in the following format:
+        content: `You are an AI Expert that fetches passport details from images. Always return the extracted   details in the following format:
                   Extract the following details:  
                   - **From the front image:** Full Name, Date of Birth (YYYY-MM-DD), Passport Number, Expiry Date, and MRZ.  
                   - **From the back image:** Complete Address (Address1, Address2, City, State, Postal Code, Country).  
@@ -134,14 +133,14 @@ export function validatePassportData(
   const isValidName = checkValidName(inputName, extractedData.name);
   const isValidDOB = extractedData.date_of_birth === inputDOB;
   const isValidPassport = extractedData.passport_number === inputPassportNumber;
-  const isValidMRZ = verifyMRZ(
-    mrzData.passportNumber,
-    mrzData.dob,
-    mrzData.expiry,
-    mrzData.passportCheckDigit,
-    mrzData.dobCheckDigit,
-    mrzData.expiryCheckDigit
-  );
+  // const isValidMRZ = verifyMRZ(
+  //   mrzData.passportNumber,
+  //   mrzData.dob,
+  //   mrzData.expiry,
+  //   mrzData.passportCheckDigit,
+  //   mrzData.dobCheckDigit,
+  //   mrzData.expiryCheckDigit
+  // );
   const currentDate = new Date();
   const expiryDate = extractedData.expiry_date
     ? new Date(extractedData.expiry_date)
@@ -153,14 +152,12 @@ export function validatePassportData(
       isValidName &&
       isValidDOB &&
       isValidPassport &&
-      isValidMRZ &&
       mrzData.nationality === "IND" &&
       isValidExpiry,
     details: {
       isValidName,
       isValidDOB,
       isValidPassport,
-      isValidMRZ,
       isValidExpiry,
     },
   };
@@ -177,6 +174,13 @@ export async function saveToGoogleSheets(
       inputDOB: data.dob,
       passportNumber: data.passportNumber,
       isValid: data.isValid,
+      expiry: data.expiry,
+      city: data.city,
+      country: data.country,
+      state: data.state,
+      address1: data.address1,
+      address2: data.address2,
+      pincode: data.pincode,
       frontImage: data.frontImageUrl,
       backImage: data.backImageUrl,
     }),

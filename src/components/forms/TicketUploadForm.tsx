@@ -1,19 +1,19 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useDispatch, useSelector } from "react-redux";
-import { setTicketDetails } from "@/store/userSlice";
+import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 
 export default function TicketUploadForm() {
   const [ticketImage, setTicketImage] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // ✅ Added error message state
   const passportDetails = useSelector(
     (state: RootState) => state.user.passportDetails
   );
   const router = useRouter();
-  const dispatch = useDispatch();
 
   useEffect(() => {
     if (!passportDetails.isVerified) {
@@ -23,12 +23,18 @@ export default function TicketUploadForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!ticketImage) return;
+    if (!ticketImage) {
+      setErrorMessage("Please select a flight ticket image."); // ✅ Set error message if no file selected
+      return;
+    }
 
     setIsSubmitting(true);
+    setErrorMessage(null); // ✅ Reset error message on new submission
+
     try {
       const formData = new FormData();
       formData.append("ticketImage", ticketImage);
+      formData.append("passportDetails", JSON.stringify(passportDetails));
 
       const response = await fetch("/api/upload-ticket", {
         method: "POST",
@@ -36,12 +42,16 @@ export default function TicketUploadForm() {
       });
 
       const data = await response.json();
-      if (data.success) {
-        dispatch(setTicketDetails({ imageUrl: data.imageUrl }));
-        router.push("/next-step");
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to upload ticket.");
       }
-    } catch (error) {
-      console.error("Error uploading ticket:", error);
+
+      if (data.success) {
+        router.push("/success");
+      }
+    } catch (error: any) {
+      setErrorMessage(error.message || "An unexpected error occurred."); // ✅ Display error message
     } finally {
       setIsSubmitting(false);
     }
@@ -51,6 +61,11 @@ export default function TicketUploadForm() {
     <div className="max-w-md mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Upload Flight Ticket</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* ✅ Display error message if exists */}
+        {errorMessage && (
+          <p className="text-red-500 text-sm font-medium">{errorMessage}</p>
+        )}
+
         <div>
           <label className="block mb-2 text-sm font-medium">
             Flight Ticket Image
