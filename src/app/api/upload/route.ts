@@ -57,9 +57,6 @@ export async function POST(req: Request) {
       mrz: extractedData.mrz,
     });
 
- 
-
-
     // 5. Upload images to Cloudinary
     const [frontUpload, backUpload] = await Promise.all([
       uploadToCloudinary(frontBuffer),
