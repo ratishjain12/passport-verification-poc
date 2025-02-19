@@ -3,7 +3,11 @@
 import { useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
-import { setPassportDetails, setValidationDetails } from "@/store/userSlice";
+import {
+  setPassportDetails,
+  setValidationDetails,
+  setContactDetails,
+} from "@/store/userSlice";
 
 interface PassportFormData {
   fullName: string;
@@ -75,6 +79,7 @@ export default function PassportVerificationForm() {
 
       if (data.success && data.isValid) {
         dispatch(setPassportDetails(data.passportDetails));
+        dispatch(setContactDetails(data.contactDetails));
         router.push(data.nextStep);
       } else {
         dispatch(setValidationDetails(data.validationDetails));

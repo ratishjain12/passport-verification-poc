@@ -14,7 +14,8 @@ const GOOGLE_SHEET_WEB_APP_URL = process.env.GOOGLE_APPS_SCRIPT_URL;
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function extractPassportDetails(
-  frontBase64: string
+  frontBase64: string,
+  backBase64: string
 ): Promise<ExtractedPassportData> {
   const aiResponse = await openai.chat.completions.create({
     model: "gpt-4o",
@@ -22,18 +23,22 @@ export async function extractPassportDetails(
       {
         role: "system",
         content:
-          'Extract passport details (Full Name, Date of Birth, Passport Number, Expiry Date) and the MRZ (Machine Readable Zone) string from the image. Ensure the MRZ as well as all other fields are correctly extracted with no characters missed. The MRZ must be formatted as two lines separated by an escaped newline character (`\\n`) as shown in the example below. The date of birth must be in the format YYYY-MM-DD. Respond **only** in JSON format with no extra text, double check mrz is correctly extracted. Example: ```json { "name": "John Doe", "date_of_birth": "1990-01-01", "passport_number": "A1234567", "mrz": "P<INDRAMADUGLA<<SITA<MAHA<LAKSHMI<<<<<<<<<<<<<<\\nJ8369854<4IND5909234F2110101<<<<<<<<<<<<<<<<<8"}```  Note: You must extract the MRZ very accurately!',
+          'Extract passport details from both front and back images. From front: Full Name, Date of Birth, Passport Number, Expiry Date and MRZ. From back: Complete address details. The MRZ must be formatted as two lines separated by an escaped newline character (`\\n`). The date of birth must be in YYYY-MM-DD format. Respond only in JSON format. Example: ```json { "name": "John Doe", "date_of_birth": "1990-01-01", "passport_number": "A1234567", "expiry_date": "2025-12-31", "mrz": "P<INDRAMADUGLA<<SITA<MAHA<LAKSHMI<<<<<<<<<<<<<<\\nJ8369854<4IND5909234F2110101<<<<<<<<<<<<<<<<<8", "address1": "123 Main St", "address2": "Apt 4B", "city": "Surat", "state": "Gujarat", "postalCode": "10001", "country": "INDIA" }```',
       },
       {
         role: "user",
         content: [
           {
             type: "text",
-            text: "Extract details from this passport image and return as JSON.",
+            text: "Extract details from these passport images. First image is front page, second is back page.",
           },
           {
             type: "image_url",
             image_url: { url: `data:image/jpeg;base64,${frontBase64}` },
+          },
+          {
+            type: "image_url",
+            image_url: { url: `data:image/jpeg;base64,${backBase64}` },
           },
         ],
       },
@@ -113,6 +118,11 @@ export function validatePassportData(
     mrzData.dobCheckDigit,
     mrzData.expiryCheckDigit
   );
+  const currentDate = new Date();
+  const expiryDate = extractedData.expiry_date
+    ? new Date(extractedData.expiry_date)
+    : null;
+  const isValidExpiry = expiryDate ? currentDate < expiryDate : false;
 
   return {
     isValid:
@@ -120,8 +130,15 @@ export function validatePassportData(
       isValidDOB &&
       isValidPassport &&
       isValidMRZ &&
-      mrzData.nationality === "IND",
-    details: { isValidName, isValidDOB, isValidPassport, isValidMRZ },
+      mrzData.nationality === "IND" &&
+      isValidExpiry,
+    details: {
+      isValidName,
+      isValidDOB,
+      isValidPassport,
+      isValidMRZ,
+      isValidExpiry,
+    },
   };
 }
 

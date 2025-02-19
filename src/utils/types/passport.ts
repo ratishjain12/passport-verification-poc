@@ -15,7 +15,14 @@ export interface ExtractedPassportData {
   name: string;
   date_of_birth: string;
   passport_number: string;
+  expiry_date: string;
   mrz: string;
+  city?: string;
+  address1: string;
+  address2?: string;
+  postalCode?: string;
+  state?: string;
+  country?: string;
 }
 
 export interface ValidationParams {
@@ -33,6 +40,7 @@ export interface ValidationResult {
     isValidDOB: boolean;
     isValidPassport: boolean;
     isValidMRZ: boolean;
+    isValidExpiry: boolean;
   };
 }
 

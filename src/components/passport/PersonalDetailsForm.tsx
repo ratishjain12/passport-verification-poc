@@ -12,17 +12,20 @@ export default function PersonalDetailsForm() {
   const passportDetails = useSelector(
     (state: RootState) => state.user.passportDetails
   );
+  const contactDetails = useSelector(
+    (state: RootState) => state.user.contactDetails
+  );
 
   const [formData, setFormData] = useState({
     name: passportDetails.name || "",
     dateOfBirth: passportDetails.dateOfBirth || "",
     passportNumber: passportDetails.passportNumber || "",
-    address1: "",
-    address2: "",
-    city: "",
-    state: "",
-    postalCode: "",
-    country: "",
+    address1: contactDetails?.address1 || "",
+    address2: contactDetails?.address2 || "",
+    city: contactDetails?.city || "",
+    state: contactDetails?.state || "",
+    postalCode: contactDetails?.postalCode || "",
+    country: contactDetails?.country || "",
   });
 
   useEffect(() => {
