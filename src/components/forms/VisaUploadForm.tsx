@@ -1,15 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setVisaDetails } from "@/store/userSlice";
+import { RootState } from "@/store/store";
 
 export default function VisaUploadForm() {
   const [visaImage, setVisaImage] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const passportDetails = useSelector(
+    (state: RootState) => state.user.passportDetails
+  );
   const router = useRouter();
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (!passportDetails.isVerified) {
+      router.push("/");
+    }
+  }, [passportDetails.isVerified, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

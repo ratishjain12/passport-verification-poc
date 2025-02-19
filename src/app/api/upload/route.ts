@@ -57,20 +57,8 @@ export async function POST(req: Request) {
       mrz: extractedData.mrz,
     });
 
-    // Check if passport is expired
-    const currentDate = new Date();
-    const expiryDate = extractedData.expiry_date
-      ? new Date(extractedData.expiry_date)
-      : null;
-    const isExpired = expiryDate ? currentDate > expiryDate : false;
+ 
 
-    if (isExpired) {
-      validationResult.isValid = false;
-      validationResult.details = {
-        ...validationResult.details,
-        isValidExpiry: false,
-      };
-    }
 
     // 5. Upload images to Cloudinary
     const [frontUpload, backUpload] = await Promise.all([
