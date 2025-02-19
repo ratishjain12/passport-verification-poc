@@ -34,11 +34,12 @@ export async function POST(req: Request) {
     const frontBuffer = Buffer.from(await frontImage.arrayBuffer());
     const backBuffer = Buffer.from(await backImage.arrayBuffer());
     const frontBase64 = frontBuffer.toString("base64");
+    const backBase64 = backBuffer.toString("base64");
 
     // 3. Extract passport details using OpenAI
     let extractedData;
     try {
-      extractedData = await extractPassportDetails(frontBase64);
+      extractedData = await extractPassportDetails(frontBase64, backBase64);
     } catch (error) {
       console.error("Error parsing AI response:", error);
       return NextResponse.json(
@@ -55,6 +56,21 @@ export async function POST(req: Request) {
       extractedData,
       mrz: extractedData.mrz,
     });
+
+    // Check if passport is expired
+    const currentDate = new Date();
+    const expiryDate = extractedData.expiry_date
+      ? new Date(extractedData.expiry_date)
+      : null;
+    const isExpired = expiryDate ? currentDate > expiryDate : false;
+
+    if (isExpired) {
+      validationResult.isValid = false;
+      validationResult.details = {
+        ...validationResult.details,
+        isValidExpiry: false,
+      };
+    }
 
     // 5. Upload images to Cloudinary
     const [frontUpload, backUpload] = await Promise.all([
@@ -85,6 +101,14 @@ export async function POST(req: Request) {
           dateOfBirth,
           passportNumber,
           isVerified: true,
+        },
+        contactDetails: {
+          city: extractedData.city || "",
+          state: extractedData.state || "",
+          country: extractedData.country || "",
+          postalCode: extractedData.postalCode || "",
+          address1: extractedData.address1 || "",
+          address2: extractedData.address2 || "",
         },
         nextStep: "/personal-details",
       });
