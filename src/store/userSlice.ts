@@ -21,6 +21,13 @@ interface UserState {
     postalCode: string;
     country: string;
   };
+  selectedCountry?: string;
+  ticketDetails?: {
+    imageUrl: string;
+  };
+  visaDetails?: {
+    imageUrl: string;
+  };
 }
 
 const initialState: UserState = {
@@ -54,9 +61,30 @@ export const userSlice = createSlice({
     ) => {
       state.validationDetails = action.payload;
     },
+    setSelectedCountry: (state, action: PayloadAction<string>) => {
+      state.selectedCountry = action.payload;
+    },
+    setTicketDetails: (
+      state,
+      action: PayloadAction<UserState["ticketDetails"]>
+    ) => {
+      state.ticketDetails = action.payload;
+    },
+    setVisaDetails: (
+      state,
+      action: PayloadAction<UserState["visaDetails"]>
+    ) => {
+      state.visaDetails = action.payload;
+    },
   },
 });
 
-export const { setPassportDetails, setContactDetails, setValidationDetails } =
-  userSlice.actions;
+export const {
+  setPassportDetails,
+  setContactDetails,
+  setValidationDetails,
+  setSelectedCountry,
+  setTicketDetails,
+  setVisaDetails,
+} = userSlice.actions;
 export default userSlice.reducer;
