@@ -85,7 +85,7 @@ export default function PassportVerificationForm() {
         dispatch(setValidationDetails(data.validationDetails));
         router.push("/verification-failed");
       }
-    } catch (err) {
+    } catch {
       setErrorMessage(
         "Failed!! Please make sure you are uploading correct passport images."
       );

@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { usePDFJS } from "@/hooks/usePDFJS";
 
@@ -82,7 +84,7 @@ export default function VisaUploadForm() {
         }
 
         // Validate extracted text against passport details
-        const { name, dateOfBirth, passportNumber } = passportDetails;
+        const { name, dateOfBirth } = passportDetails;
         console.log(name, dateOfBirth);
 
         const extractDOBPattern = /(\d{2})\/(\d{2})\/(\d{4})/;

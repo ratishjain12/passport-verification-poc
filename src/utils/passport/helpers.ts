@@ -1,7 +1,6 @@
 import { v2 as cloudinary } from "cloudinary";
 import { OpenAI } from "openai";
 import { parseMRZ } from "../mrz/parseMRZ";
-import { verifyMRZ } from "../mrz/verifyMRZ";
 import { checkValidName } from "../validation/verifyName";
 import type {
   ValidationParams,
@@ -175,6 +174,13 @@ export async function saveToGoogleSheets(
       inputDOB: data.dob,
       passportNumber: data.passportNumber,
       isValid: data.isValid,
+      expiry: data.expiry,
+      city: data.city,
+      country: data.country,
+      state: data.state,
+      address1: data.address1,
+      address2: data.address2,
+      pincode: data.pincode,
       frontImage: data.frontImageUrl,
       backImage: data.backImageUrl,
     }),

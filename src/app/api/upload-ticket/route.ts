@@ -7,9 +7,7 @@ const openai = new OpenAI({
 });
 
 // Function to extract flight ticket details
-export async function extractFlightTicketDetails(
-  ticketBase64: string
-): Promise<{
+async function extractFlightTicketDetails(ticketBase64: string): Promise<{
   passengerName: string;
   flightNumber: string;
   departure: string;
