@@ -22,8 +22,31 @@ export async function extractPassportDetails(
     messages: [
       {
         role: "system",
-        content:
-          'Extract passport details from both front and back images. From front: Full Name, Date of Birth, Passport Number, Expiry Date and MRZ. From back: Complete address details. The MRZ must be formatted as two lines separated by an escaped newline character (`\\n`). The date of birth must be in YYYY-MM-DD format. Respond only in JSON format. Example: ```json { "name": "John Doe", "date_of_birth": "1990-01-01", "passport_number": "A1234567", "expiry_date": "2025-12-31", "mrz": "P<INDRAMADUGLA<<SITA<MAHA<LAKSHMI<<<<<<<<<<<<<<\\nJ8369854<4IND5909234F2110101<<<<<<<<<<<<<<<<<8", "address1": "123 Main St", "address2": "Apt 4B", "city": "Surat", "state": "Gujarat", "postalCode": "10001", "country": "INDIA" }```',
+        content: `You are an AI that extracts passport details from images. Always return the extracted   details in the following format:
+                  Extract the following details:  
+                  - **From the front image:** Full Name, Date of Birth (YYYY-MM-DD), Passport Number, Expiry Date, and MRZ.  
+                  - **From the back image:** Complete Address (Address1, Address2, City, State, Postal Code, Country).  
+
+                  The **MRZ must be formatted** as two lines separated by an escaped newline character (\\n).   
+
+                  ### **Response format:**  
+                  \`\`\`json  
+                  {
+                    "name": "John Doe",
+                    "date_of_birth": "1990-01-01",
+                    "passport_number": "A1234567",
+                    "expiry_date": "2025-12-31",
+                    "mrz": "P<INDDOE<<JOHN<<<<<<<<<<<<<<<<<\\nA1234567<8IND9001017M3001012<<<<<<<<<<<<<<<<<4",
+                    "address1": "123 Main St",
+                    "address2": "Apt 4B",
+                    "city": "Surat",
+                    "state": "Gujarat",
+                    "postalCode": "10001",
+                    "country": "INDIA"
+                  }  
+                  \`\`\`  
+
+                  Return **only** this JSON and nothing else.`,
       },
       {
         role: "user",
@@ -48,6 +71,7 @@ export async function extractPassportDetails(
   const aiResponseText = aiResponse.choices[0]?.message?.content || "";
   console.log("Raw AI Response:", aiResponseText);
 
+  // Ensure JSON format is clean and parse correctly
   let cleanedResponse = aiResponseText.replace(/```json|```/g, "").trim();
   cleanedResponse = cleanedResponse.replace(/^json\s*/, "").trim();
 
