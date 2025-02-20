@@ -23,7 +23,7 @@ export async function extractPassportDetails(
         role: "system",
         content: `You are an AI Expert that fetches passport details from images. Always return the extracted   details in the following format:
                   Extract the following details:  
-                  - **From the front image:** Full Name, Date of Birth (YYYY-MM-DD), Passport Number, Expiry Date, and MRZ.  
+                  - **From the front image:** Full Name(make sure with surname don't miss surname), Date of Birth (YYYY-MM-DD), Passport Number, Expiry Date, and MRZ.  
                   - **From the back image:** Complete Address (Address1, Address2, City, State, Postal Code, Country).  
 
                   The **MRZ must be formatted** as two lines separated by an escaped newline character (\\n).   
