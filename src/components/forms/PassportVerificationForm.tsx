@@ -48,17 +48,42 @@ export default function PassportVerificationForm() {
     const { fullName, dateOfBirth, passportNumber, frontImage, backImage } =
       formData;
 
-    if (
-      !fullName ||
-      !dateOfBirth ||
-      !passportNumber ||
-      !frontImage ||
-      !backImage
-    ) {
-      setErrorMessage("Please fill in all required fields");
+    // First, check if any required fields are missing
+    if (!fullName || !passportNumber || !frontImage || !backImage) {
+      setErrorMessage("Please fill in all required fields.");
       return;
     }
 
+    // Check if dateOfBirth is missing or invalid
+    if (!dateOfBirth) {
+      setErrorMessage("Please enter a valid date of birth.");
+      return;
+    }
+
+    const birthDate = new Date(dateOfBirth);
+    if (isNaN(birthDate.getTime())) {
+      setErrorMessage("Invalid date. Please enter a valid date of birth.");
+      return;
+    }
+
+    // Validate Leap Year for February 29
+    const [year, month, day] = dateOfBirth.split("-").map(Number);
+    if (month === 2 && day === 29) {
+      if (!(year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0))) {
+        setErrorMessage("Invalid date. This year does not have February 29.");
+        return;
+      }
+    }
+
+    const today = new Date();
+
+    // Check if the date is in the future
+    if (birthDate > today) {
+      setErrorMessage("Date of birth cannot be in the future.");
+      return;
+    }
+
+    // Reset error message and continue with form submission
     setIsSubmitting(true);
     setErrorMessage("");
     setShowModal(true); // Show modal when submission starts
