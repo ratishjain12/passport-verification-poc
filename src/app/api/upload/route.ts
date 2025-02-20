@@ -14,6 +14,8 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+export const maxDuration = 30;
+
 export async function POST(req: Request) {
   try {
     // 1. Extract form data
