@@ -3,10 +3,8 @@ import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
 import {
   extractPassportDetails,
-  uploadToCloudinary,
   extractFormData,
   validatePassportData,
-  saveToGoogleSheets,
 } from "@/utils/passport/helpers";
 
 // Cloudinary Configuration
@@ -15,6 +13,8 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+
+export const maxDuration = 30;
 
 export async function POST(req: Request) {
   try {
@@ -58,30 +58,30 @@ export async function POST(req: Request) {
     });
 
     // 5. Upload images to Cloudinary
-    const [frontUpload, backUpload] = await Promise.all([
-      uploadToCloudinary(frontBuffer),
-      uploadToCloudinary(backBuffer),
-    ]);
+    // const [frontUpload, backUpload] = await Promise.all([
+    //   uploadToCloudinary(frontBuffer),
+    //   uploadToCloudinary(backBuffer),
+    // ]);
 
-    const frontImageUrl = (frontUpload as any).secure_url;
-    const backImageUrl = (backUpload as any).secure_url;
+    // const frontImageUrl = (frontUpload as any).secure_url;
+    // const backImageUrl = (backUpload as any).secure_url;
 
     // 6. Save to Google Sheets
-    await saveToGoogleSheets({
-      name: fullName,
-      dob: dateOfBirth,
-      passportNumber: extractedData.passport_number?.trim() || "",
-      expiry: extractedData.expiry_date,
-      city: extractedData.city,
-      state: extractedData.state,
-      country: extractedData.country,
-      pincode: extractedData.postalCode,
-      address1: extractedData.address1,
-      address2: extractedData.address2,
-      isValid: validationResult.isValid,
-      frontImageUrl,
-      backImageUrl,
-    });
+    // await saveToGoogleSheets({
+    //   name: fullName,
+    //   dob: dateOfBirth,
+    //   passportNumber: extractedData.passport_number?.trim() || "",
+    //   expiry: extractedData.expiry_date,
+    //   city: extractedData.city,
+    //   state: extractedData.state,
+    //   country: extractedData.country,
+    //   pincode: extractedData.postalCode,
+    //   address1: extractedData.address1,
+    //   address2: extractedData.address2,
+    //   isValid: validationResult.isValid,
+    //   frontImageUrl,
+    //   backImageUrl,
+    // });
 
     if (validationResult.isValid) {
       // Redirect to contact details page with verified status
