@@ -101,16 +101,16 @@ export default function PassportVerificationForm() {
       });
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error);
-
+      if (response.status in [400, 502, 500]) {
+        throw new Error(data.message || "An unexpected error occurred.");
+      }
       if (data.success && data.isValid) {
         dispatch(setPassportDetails(data.passportDetails));
         dispatch(setContactDetails(data.contactDetails));
-        router.push(data.nextStep);
-      } else {
+      } else if (!data.success && !data.isValid) {
         dispatch(setValidationDetails(data.validationDetails));
-        router.push("/verification-failed");
       }
+      router.push(data.nextStep);
     } catch (error: any) {
       setErrorMessage(error.message);
     } finally {
