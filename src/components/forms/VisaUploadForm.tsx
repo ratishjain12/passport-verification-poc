@@ -147,7 +147,7 @@ export default function VisaUploadForm() {
               accept="application/pdf"
               onChange={(e) => setVisaPDF(e.target.files?.[0] || null)}
               required
-              className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="file-input"
             />
           </div>
           <button
