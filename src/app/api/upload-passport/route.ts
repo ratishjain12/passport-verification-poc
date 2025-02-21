@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
 import {
@@ -25,7 +24,7 @@ export async function POST(req: Request) {
 
     if (!frontImage || !backImage) {
       return NextResponse.json(
-        { error: "Both images are required" },
+        { error: "Both front and back images of the passport are required." },
         { status: 400 }
       );
     }
@@ -41,10 +40,12 @@ export async function POST(req: Request) {
     try {
       extractedData = await extractPassportDetails(frontBase64, backBase64);
     } catch (error) {
-      console.error("Error parsing AI response:", error);
+      console.error("Error extracting passport details:", error);
       return NextResponse.json(
-        { error: "Failed to parse AI response. Please try again." },
-        { status: 500 }
+        {
+          error: "Failed to process passport details. Please try again later.",
+        },
+        { status: 502 }
       );
     }
 
@@ -85,37 +86,45 @@ export async function POST(req: Request) {
 
     if (validationResult.isValid) {
       // Redirect to contact details page with verified status
-      return NextResponse.json({
-        success: true,
-        isValid: true,
-        passportDetails: {
-          name: fullName,
-          dateOfBirth,
-          passportNumber,
-          isVerified: true,
+      return NextResponse.json(
+        {
+          success: true,
+          message: "Passport details verified successfully.",
+          isValid: true,
+          passportDetails: {
+            name: fullName,
+            dateOfBirth,
+            passportNumber,
+            isVerified: true,
+          },
+          contactDetails: {
+            city: extractedData.city || "",
+            state: extractedData.state || "",
+            country: extractedData.country || "",
+            postalCode: extractedData.postalCode || "",
+            address1: extractedData.address1 || "",
+            address2: extractedData.address2 || "",
+          },
+          nextStep: "/personal-details",
         },
-        contactDetails: {
-          city: extractedData.city || "",
-          state: extractedData.state || "",
-          country: extractedData.country || "",
-          postalCode: extractedData.postalCode || "",
-          address1: extractedData.address1 || "",
-          address2: extractedData.address2 || "",
-        },
-        nextStep: "/personal-details",
-      });
+        { status: 200 }
+      );
     }
 
-    return NextResponse.json({
-      success: false,
-      isValid: false,
-      validationDetails: validationResult.details,
-      nextStep: "/verification-failed",
-    });
-  } catch (error) {
-    console.error("Processing Error:", error);
     return NextResponse.json(
-      { error: "Something went wrong." },
+      {
+        success: false,
+        message: "Passport verification failed due to mismatched data.",
+        isValid: false,
+        validationDetails: validationResult.details,
+        nextStep: "/verification-failed",
+      },
+      { status: 422 }
+    );
+  } catch (error) {
+    console.error("Server Error:", error);
+    return NextResponse.json(
+      { error: "An internal server error occurred. Please try again later." },
       { status: 500 }
     );
   }

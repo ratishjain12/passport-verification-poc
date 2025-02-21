@@ -133,7 +133,9 @@ export function validatePassportData(
     ? new Date(extractedData.expiry_date)
     : null;
   const isValidExpiry = expiryDate ? currentDate < expiryDate : false;
-  const isValidCountry = extractedData.country?.toUpperCase() === "INDIA";
+  const isValidCountry =
+    extractedData.country?.toUpperCase() === "INDIA" ||
+    extractedData.mrz.includes("IND");
   return {
     isValid:
       isValidName &&

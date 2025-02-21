@@ -79,11 +79,10 @@ export async function POST(req: Request) {
 
     if (!ticketImage) {
       return NextResponse.json(
-        { success: false, error: "No flight ticket image provided." },
+        { success: false, message: "Flight ticket image is required." },
         { status: 400 }
       );
     }
-
     // ✅ Read file as buffer and convert to base64
     const ticketBuffer = Buffer.from(await ticketImage.arrayBuffer());
     const ticketBase64 = ticketBuffer.toString("base64");
@@ -96,9 +95,10 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           success: false,
-          error: "Could not extract passenger name from flight ticket.",
+          message:
+            "Could not extract passenger name from the flight ticket. Ensure the image is clear and contains the required details.",
         },
-        { status: 400 }
+        { status: 422 } // Unprocessable Entity
       );
     }
 
@@ -114,12 +114,12 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           success: false,
-          error: "Passenger name does not match passport details.",
+          message:
+            "Passenger name on the ticket does not match the passport details. Please check and upload the correct ticket.",
         },
-        { status: 400 }
+        { status: 403 } // Forbidden
       );
     }
-
     // ✅ If validation passes
     return NextResponse.json({
       success: true,

@@ -1,9 +1,33 @@
 "use client";
 
-import { motion } from "motion/react";
+import { RootState } from "@/store/store";
+import { motion } from "framer-motion";
 import { CheckCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { useSelector } from "react-redux";
 
 const SuccessPage = () => {
+  const router = useRouter();
+
+  // Get state from Redux store
+  const { passportDetails, ticketDetails, visaDetails } = useSelector(
+    (state: RootState) => state.user
+  );
+
+  // Check if user is allowed to access this page
+  const isAllowed =
+    passportDetails.isVerified &&
+    (ticketDetails?.isVerified || visaDetails?.isVerified);
+
+  useEffect(() => {
+    if (!isAllowed) {
+      router.replace("/"); // Redirect if conditions are not met
+    }
+  }, [isAllowed, router]);
+
+  if (!isAllowed) return null; // Prevent rendering until redirect happens
+
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
       {/* Animated Check Icon */}

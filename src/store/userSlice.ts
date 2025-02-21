@@ -25,10 +25,10 @@ interface UserState {
   };
   selectedCountry?: string;
   ticketDetails?: {
-    imageUrl: string;
+    isVerified: boolean;
   };
   visaDetails?: {
-    fileUrl: string;
+    isVerified: boolean;
   };
 }
 
