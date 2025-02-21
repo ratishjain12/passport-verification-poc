@@ -1,16 +1,3 @@
-export interface PassportMRZData {
-  passportNumber: string;
-  passportCheckDigit: string;
-  nationality: string;
-  dob: string;
-  dobCheckDigit: string;
-  sex: string;
-  expiry: string;
-  expiryCheckDigit: string;
-  personalNumber: string;
-  finalCheckDigit: string;
-}
-
 export interface ExtractedPassportData {
   name: string;
   date_of_birth: string;
@@ -40,6 +27,7 @@ export interface ValidationResult {
     isValidDOB: boolean;
     isValidPassport: boolean;
     isValidExpiry: boolean;
+    isValidCountry: boolean;
   };
 }
 

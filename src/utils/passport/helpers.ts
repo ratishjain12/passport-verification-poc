@@ -1,6 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
 import { OpenAI } from "openai";
-import { parseMRZ } from "../mrz/parseMRZ";
 import { checkValidName } from "../validation/verifyName";
 import type {
   ValidationParams,
@@ -123,24 +122,12 @@ export function extractFormData(formData: FormData) {
 export function validatePassportData(
   params: ValidationParams
 ): ValidationResult {
-  const { inputName, inputDOB, inputPassportNumber, extractedData, mrz } =
-    params;
-
-  console.log("mrz", mrz);
-
-  const mrzData = parseMRZ(mrz);
+  const { inputName, inputDOB, inputPassportNumber, extractedData } = params;
 
   const isValidName = checkValidName(inputName, extractedData.name);
   const isValidDOB = extractedData.date_of_birth === inputDOB;
   const isValidPassport = extractedData.passport_number === inputPassportNumber;
-  // const isValidMRZ = verifyMRZ(
-  //   mrzData.passportNumber,
-  //   mrzData.dob,
-  //   mrzData.expiry,
-  //   mrzData.passportCheckDigit,
-  //   mrzData.dobCheckDigit,
-  //   mrzData.expiryCheckDigit
-  // );
+
   const currentDate = new Date();
   const expiryDate = extractedData.expiry_date
     ? new Date(extractedData.expiry_date)
@@ -152,13 +139,14 @@ export function validatePassportData(
       isValidName &&
       isValidDOB &&
       isValidPassport &&
-      mrzData.nationality === "IND" &&
+      extractedData.country === "INDIA" &&
       isValidExpiry,
     details: {
       isValidName,
       isValidDOB,
       isValidPassport,
       isValidExpiry,
+      isValidCountry: extractedData.country === "INDIA",
     },
   };
 }

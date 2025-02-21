@@ -70,6 +70,7 @@ export default function VisaUploadForm() {
           "visa valid till",
           "type of visa",
           "visa issuing authority",
+          //"Travel Document Number"
         ];
 
         const isVisaPDF = requiredKeywords.every((keyword) =>

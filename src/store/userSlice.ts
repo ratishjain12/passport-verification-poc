@@ -13,6 +13,7 @@ interface UserState {
     isValidPassport: boolean;
     isValidMRZ: boolean;
     isValidExpiry: boolean;
+    isValidCountry: boolean;
   };
   contactDetails?: {
     address1: string;
