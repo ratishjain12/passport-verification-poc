@@ -13,6 +13,7 @@ interface UserState {
     isValidPassport: boolean;
     isValidMRZ: boolean;
     isValidExpiry: boolean;
+    isValidCountry: boolean;
   };
   contactDetails?: {
     address1: string;
@@ -24,10 +25,10 @@ interface UserState {
   };
   selectedCountry?: string;
   ticketDetails?: {
-    imageUrl: string;
+    isVerified: boolean;
   };
   visaDetails?: {
-    fileUrl: string;
+    isVerified: boolean;
   };
 }
 

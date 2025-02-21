@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -94,7 +95,7 @@ export default function PassportVerificationForm() {
         if (value) formPayload.append(key, value);
       });
 
-      const response = await fetch("/api/upload", {
+      const response = await fetch("/api/upload-passport", {
         method: "POST",
         body: formPayload,
       });
@@ -110,10 +111,8 @@ export default function PassportVerificationForm() {
         dispatch(setValidationDetails(data.validationDetails));
         router.push("/verification-failed");
       }
-    } catch {
-      setErrorMessage(
-        "Failed!! Please make sure you are uploading correct passport images."
-      );
+    } catch (error: any) {
+      setErrorMessage(error.message);
     } finally {
       setIsSubmitting(false);
       setShowModal(false); // Hide modal after submission completes

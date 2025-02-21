@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
@@ -49,127 +48,127 @@ export default function PersonalDetailsForm() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Contact Details</h1>
-
-      <div className="bg-gray-50 p-4 rounded mb-6">
-        <h2 className="font-semibold mb-2">Passport Details</h2>
-        <div className="space-y-4">
-          <div>
-            <label className="block mb-1">Name*</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              required
-              className="w-full p-2 border rounded"
-            />
-          </div>
-          <div>
-            <label className="block mb-1">Date of Birth*</label>
-            <input
-              type="date"
-              name="dateOfBirth"
-              value={formData.dateOfBirth}
-              required
-              className="w-full p-2 border rounded"
-            />
-          </div>
-          <div>
-            <label className="block mb-1">Passport Number*</label>
-            <input
-              type="text"
-              name="passportNumber"
-              value={formData.passportNumber}
-              required
-              className="w-full p-2 border rounded"
-            />
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+      {/* Card Container */}
+      <div className="bg-white p-6 rounded-lg shadow-lg max-w-2xl w-full space-y-6">
+        <h1 className="text-2xl font-bold text-center mb-6">Contact Details</h1>
+        <div className="bg-gray-50 p-4 rounded mb-6">
+          <h2 className="font-semibold mb-2">Passport Details</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block mb-1">Name*</label>
+              <input
+                type="text"
+                name="name"
+                defaultValue={formData.name}
+                required
+                readOnly
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block mb-1">Date of Birth*</label>
+              <input
+                type="date"
+                name="dateOfBirth"
+                defaultValue={formData.dateOfBirth}
+                required
+                readOnly
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block mb-1">Passport Number*</label>
+              <input
+                type="text"
+                name="passportNumber"
+                defaultValue={formData.passportNumber}
+                required
+                readOnly
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
           </div>
         </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Address fields */}
+          <div>
+            <label className="block mb-1">Address Line 1*</label>
+            <input
+              type="text"
+              name="address1"
+              value={formData.address1}
+              onChange={handleChange}
+              required
+              className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block mb-1">Address Line 2</label>
+            <input
+              type="text"
+              name="address2"
+              value={formData.address2}
+              onChange={handleChange}
+              className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block mb-1">City*</label>
+              <input
+                type="text"
+                name="city"
+                value={formData.city}
+                onChange={handleChange}
+                required
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block mb-1">State/Province*</label>
+              <input
+                type="text"
+                name="state"
+                value={formData.state}
+                onChange={handleChange}
+                required
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block mb-1">Postal Code*</label>
+              <input
+                type="number"
+                name="postalCode"
+                value={formData.postalCode}
+                onChange={handleChange}
+                required
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block mb-1">Country*</label>
+              <input
+                type="text"
+                name="country"
+                value={formData.country}
+                onChange={handleChange}
+                required
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+          <button
+            type="submit"
+            className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors duration-200"
+          >
+            Continue
+          </button>
+        </form>
       </div>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Address fields */}
-        <div>
-          <label className="block mb-1">Address Line 1*</label>
-          <input
-            type="text"
-            name="address1"
-            value={formData.address1}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border rounded"
-          />
-        </div>
-
-        <div>
-          <label className="block mb-1">Address Line 2</label>
-          <input
-            type="text"
-            name="address2"
-            value={formData.address2}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block mb-1">City*</label>
-            <input
-              type="text"
-              name="city"
-              value={formData.city}
-              onChange={handleChange}
-              required
-              className="w-full p-2 border rounded"
-            />
-          </div>
-          <div>
-            <label className="block mb-1">State/Province*</label>
-            <input
-              type="text"
-              name="state"
-              value={formData.state}
-              onChange={handleChange}
-              required
-              className="w-full p-2 border rounded"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block mb-1">Postal Code*</label>
-            <input
-              type="text"
-              name="postalCode"
-              value={formData.postalCode}
-              onChange={handleChange}
-              required
-              className="w-full p-2 border rounded"
-            />
-          </div>
-          <div>
-            <label className="block mb-1">Country*</label>
-            <input
-              type="text"
-              name="country"
-              value={formData.country}
-              onChange={handleChange}
-              required
-              className="w-full p-2 border rounded"
-            />
-          </div>
-        </div>
-
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
-        >
-          Continue
-        </button>
-      </form>
     </div>
   );
 }

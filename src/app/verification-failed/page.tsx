@@ -21,11 +21,11 @@ export default function VerificationFailed() {
     if (!validationDetails?.isValidPassport) {
       reasons.push("Passport number doesn't match with passport");
     }
-    // if (!validationDetails?.isValidMRZ) {
-    //   reasons.push("MRZ validation failed - possible document tampering");
-    // }
     if (!validationDetails?.isValidExpiry) {
       reasons.push("Passport is expired");
+    }
+    if (!validationDetails?.isValidCountry) {
+      reasons.push("Passport is not from India");
     }
     return reasons.length ? reasons : ["Could not verify passport details"];
   };
