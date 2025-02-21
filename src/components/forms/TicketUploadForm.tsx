@@ -39,9 +39,10 @@ export default function TicketUploadForm() {
         body: formData,
       });
       const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to upload ticket.");
+      if (response.status !== 200) {
+        throw new Error(data.message || "Invalid ticket image.");
       }
+
       if (data.success) {
         dispatch(setTicketDetails({ isVerified: true }));
         router.push("/success");
