@@ -76,7 +76,7 @@ export default function TicketUploadForm() {
               accept="image/*"
               onChange={(e) => setTicketImage(e.target.files?.[0] || null)}
               required
-              className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="file-input"
             />
           </div>
           <button
