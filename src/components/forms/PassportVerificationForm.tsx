@@ -94,7 +94,7 @@ export default function PassportVerificationForm() {
         if (value) formPayload.append(key, value);
       });
 
-      const response = await fetch("/api/upload", {
+      const response = await fetch("/api/upload-passport", {
         method: "POST",
         body: formPayload,
       });
